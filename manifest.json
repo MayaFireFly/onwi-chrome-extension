@@ -2,7 +2,7 @@
   "name": "Open New Window in Incognito mode (ONWI)",    
   "version": "1.0",    
   "description": "Google chrome extension for open new window in incognito mode.",
-  "permissions": ["tabs","activeTab","declarativeContent","storage"],
+  "permissions": ["tabs","activeTab","declarativeContent","storage","*://*/*"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false

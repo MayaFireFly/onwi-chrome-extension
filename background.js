@@ -21,13 +21,45 @@ chrome.runtime.onInstalled.addListener(function() {
         new chrome.declarativeContent.ShowPageAction()
       ]
     }]);
-  }); 
-  
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){     
-    chrome.windows.create({
-      url:request.link,
-      focused: true,
-      incognito: true
-    }); 
+  });    
+
+  chrome.manifest = chrome.app.getDetails();
+
+  var injectIntoTab = function (tab){
+    var scripts = chrome.manifest.content_scripts[0].js;
+    var i = 0, s = scripts.length;
+    for( ; i < s; i++ ){
+        chrome.tabs.executeScript(tab.id, {
+            file: scripts[i]
+        });
+    }
+  }
+
+  chrome.windows.getAll({
+    populate: true
+  }, function (windows){
+    var i = 0, w = windows.length, currentWindow;
+    for( ; i < w; i++ ) {
+        currentWindow = windows[i];
+        var j = 0, t = currentWindow.tabs.length, currentTab;
+        for( ; j < t; j++ ) {
+            currentTab = currentWindow.tabs[j];
+            if(currentTab.url.match(/https?:\/\/(www\.)?(host1|host2|host3)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi)){    //<==your host here
+                injectIntoTab(currentTab);
+            }
+        }
+    }
   });
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){     
+  chrome.windows.create({
+    url:request.link,
+    focused: true,
+    incognito: true
+  }); 
+});
+
+chrome.runtime.onUpdateAvailable.addListener(function(details){
+  chrome.runtime.reload();
 });
